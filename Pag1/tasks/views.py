@@ -3,15 +3,15 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django import forms
 
-task = []
-
 class NewTaskForm(forms.Form):
     tasks = forms.CharField(label="New Task")
 
 # Create your views here.
 def index(request):
+    if "tasks" not in request.session:
+        request.session["tasks"] = []
     return render (request, "task/index.html", {
-        "tasks": task
+        "tasks": request.session["tasks"]
     })
 
 def add(request):
@@ -19,7 +19,7 @@ def add(request):
         form = NewTaskForm(request.POST)
         if form.is_valid():
             tasks = form.cleaned_data["tasks"]
-            task.append(tasks)
+            request.session["tasks"] += [tasks]
             return HttpResponseRedirect("/task")
         else:
             return render(request, "task/add.html",{
